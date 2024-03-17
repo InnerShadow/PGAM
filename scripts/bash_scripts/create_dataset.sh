@@ -63,7 +63,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                 prefetch "${read_id}" -o "${read_id}.sra"
 
                 # Get reads quality
-                fastq-dump "${read_id}".sra
+                fastq-dump "${read_id}.sra"
 
                 # Remove reads with low quality
                 # discard remaining adapters
@@ -91,6 +91,10 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # Index reads with no rRNA reads
                 samtools index "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
 
+                # Grab CIGAR column from reads
+                python3 ../../../sctipts/python_scripts/extract_CIGAR_info.py \
+                    "${read_id}_fastp_mapping_sorted_no_rRNA.bam" "${read_id}_.CIGAR_info.txt"
+
                 # Convert this reads into .fastq format to make sure our data is clean using FastQC
                 bedtools bamtofastq -i "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -fq "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
@@ -101,15 +105,28 @@ while IFS= read -r line || [ -n "$line" ]; do
                 stringtie "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -o "${read_id}.gtf"
 
                 # rm a lot of things
+                rm "${read_id}.sra"
+                rm "${read_id}.fastq"
+                rm "${read_id}_fastp.fastq"
+                rm "${read_id}_fastp_mapping.bam"
+                rm "${read_id}_fastp_mapping_sorted.bam"
+                rm "${read_id}_fastp_mapping_sorted.bam.bai"
+                rm "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
+                rm "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
                 cd ..
 
             done
             echo
 
-            # Merge all three reads -> get conservative sites 
+            # Merge all reads -> get conservative sites 
             find . -name '*.gtf' > "${reference_genome}_gtf_files.txt"
             stringtie --merge -o "${reference_genome}_gtf_merged.gtf" "${reference_genome}_gtf_files.txt"
+
+            # Remove other tmp files
+            rm -R index
+            rm "reference_genome_${reference_genome}.gff3"
+            rm "reference_genome_${reference_genome}_rRNA_coordinates.bed"
 
             # Back to source directory
             cd ../../../
