@@ -91,7 +91,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # Index reads with no rRNA reads
                 samtools index "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
 
-                # Grab CIGAR column from reads
+                # Grab CIGAR column from reads & same it
                 python3 ../../../sctipts/python_scripts/extract_CIGAR_info.py \
                     "${read_id}_fastp_mapping_sorted_no_rRNA.bam" "${read_id}_.CIGAR_info.txt"
 
