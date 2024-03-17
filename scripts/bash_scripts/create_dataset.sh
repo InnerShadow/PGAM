@@ -70,7 +70,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # generate fastp report in html format 
                 fastp -i "${read_id}".fastq -o "${read_id}_fastp.fastq" -h "${read_id}_fastp_report.html"
 
-                # Make FastQC analysis
+                # Make FastQC analysis, save html doc for report
                 fastqc "${read_id}_fastp".fastq -o "${read_id}_fastp_fastqc.html"
 
                 # Align reads to the reference genome & save align results to .txt file
@@ -98,7 +98,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # Convert this reads into .fastq format to make sure our data is clean using FastQC
                 bedtools bamtofastq -i "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -fq "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
-                # Check reads using FastQC
+                # Check reads using FastQC, save html doc for report
                 fastqc "${read_id}_fastp_mapping_sorted_no_rRNA.fastq" -o "${read_id}_fastp_mapping_sorted_no_rRNA_fastqc.html"
 
                 # Get annotations based on this reads
