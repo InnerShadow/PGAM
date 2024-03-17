@@ -3,23 +3,23 @@ import os
 from Bio import Entrez
 
 def get_the_reference_genome(assembly_id, email, output_folder_id):
-    Entrez.email = args.email
+    Entrez.email = email
 
-    output_path = os.path.join("data/samples/", f"sample_{output_folder_id}")
+    output_path = os.path.join("../", f"sample_{output_folder_id}")
     os.makedirs(output_path, exist_ok = True)
 
     genome_handle = Entrez.efetch(db = "nucleotide", id = assembly_id, rettype = "fasta", retmode = "text")
     genome_data = genome_handle.read()
     genome_handle.close()
 
-    annotation_handle = Entrez.efetch(db = "nucleotide", id = assembly_id, rettype = "gtf", retmode = "text")
+    annotation_handle = Entrez.efetch(db = "nucleotide", id = assembly_id, rettype = "gff3", retmode = "text")
     annotation_data = annotation_handle.read()
     annotation_handle.close()
 
     with open(os.path.join(output_path, f"reference_genome_{assembly_id}.fasta"), "w") as genome_file:
         genome_file.write(genome_data)
 
-    with open(os.path.join(output_path, f"reference_genome_{assembly_id}.gtf"), "w") as annotation_file:
+    with open(os.path.join(output_path, f"reference_genome_{assembly_id}.gff3"), "w") as annotation_file:
         annotation_file.write(annotation_data)
 
 
@@ -31,4 +31,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     get_the_reference_genome(args.assembly_id, args.email, args.output_folder_id)
+
+    print(f"completing the download of {args.assembly_id} files!")
 

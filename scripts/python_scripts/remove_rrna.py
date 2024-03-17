@@ -35,3 +35,5 @@ if __name__ == '__main__':
 
     remove_rrna_reads(args.bam_file, args.bed_file, args.output_bam, args.offset)
 
+    print("rRNA was removed!")
+
