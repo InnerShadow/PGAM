@@ -65,15 +65,15 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # Get reads quality
                 fastq-dump "${read_id}.sra"
 
-                # Remove reads with low quality
-                # discard remaining adapters
+                # Remove reads with low quality &
+                # discard remaining adapters &
                 # generate fastp report in html format 
                 fastp -i "${read_id}".fastq -o "${read_id}_fastp.fastq" -h "${read_id}_fastp_report.html"
 
                 # Make FastQC analysis
                 fastqc "${read_id}_fastp".fastq -o "${read_id}_fastp_fastqc.html"
 
-                # Align reads to the reference genome
+                # Align reads to the reference genome & save align results to .txt file
                 bowtie2 --local -p 6 -x "index/${reference_genome}_index" -U "${read_id}_fastp.fastq" \
                     | samtools view -O BAM -b -o "${read_id}_fastp_mapping.bam" > "${read_id}_alignments_report.txt"
 
