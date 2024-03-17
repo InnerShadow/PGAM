@@ -68,13 +68,13 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # Remove reads with low quality &
                 # discard remaining adapters &
                 # generate fastp report in html format 
-                fastp -i "${read_id}".fastq -o "${read_id}_fastp.fastq" -h "${read_id}_fastp_report.html"
+                fastp -i "${read_id}.fastq" -o "${read_id}_fastp.fastq" -h "${read_id}_fastp_report.html"
 
                 # Make FastQC analysis, save html doc for report
-                fastqc "${read_id}_fastp".fastq -o "${read_id}_fastp_fastqc.html"
+                fastqc "${read_id}_fastp.fastq"
 
                 # Align reads to the reference genome & save align results to .txt file
-                bowtie2 --local -p 6 -x "index/${reference_genome}_index" -U "${read_id}_fastp.fastq" \
+                bowtie2 --local -p 6 -x "../index/${reference_genome}_index" -U "${read_id}_fastp.fastq" \
                     | samtools view -O BAM -b -o "${read_id}_fastp_mapping.bam" > "${read_id}_alignments_report.txt"
 
                 # Sort alignments
@@ -99,12 +99,13 @@ while IFS= read -r line || [ -n "$line" ]; do
                 bedtools bamtofastq -i "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -fq "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
                 # Check reads using FastQC, save html doc for report
-                fastqc "${read_id}_fastp_mapping_sorted_no_rRNA.fastq" -o "${read_id}_fastp_mapping_sorted_no_rRNA_fastqc.html"
+                fastqc "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
                 # Get annotations based on this reads
                 stringtie "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -o "${read_id}.gtf"
 
                 # rm a lot of things
+                rm "fastp.json"
                 rm "${read_id}.sra"
                 rm "${read_id}.fastq"
                 rm "${read_id}_fastp.fastq"
