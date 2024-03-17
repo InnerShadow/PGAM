@@ -75,7 +75,7 @@ while IFS= read -r line || [ -n "$line" ]; do
 
                 # Align reads to the reference genome & save align results to .txt file
                 bowtie2 --local -p 6 -x "../index/${reference_genome}_index" -U "${read_id}_fastp.fastq" \
-                    | samtools view -O BAM -b -o "${read_id}_fastp_mapping.bam" > "${read_id}_alignments_report.txt"
+                    | samtools view -O BAM -b -o "${read_id}_fastp_mapping.bam" 2> "${read_id}_alignments_report.txt"
 
                 # Sort alignments
                 samtools sort -@ 6 -O BAM -o "${read_id}_fastp_mapping_sorted.bam" "${read_id}_fastp_mapping.bam"
