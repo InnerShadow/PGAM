@@ -31,8 +31,6 @@ while IFS= read -r line || [ -n "$line" ]; do
     else
         # If the line is empty, it's the end of a record
         if [ -n "$reference_genome" ] && [ ${#raw_reads[@]} -gt 0 ]; then
-            # Process the record (here you can add code to do whatever you want with the record)
-
             # Preprocess reference genome
             echo "Reference Genome: $reference_genome"
 
