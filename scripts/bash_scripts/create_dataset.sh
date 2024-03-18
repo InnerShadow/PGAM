@@ -103,9 +103,7 @@ while IFS= read -r line || [ -n "$line" ]; do
 
                 # Get annotations based on this reads
                 stringtie "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -o "${read_id}.gtf"
-
-                awk -v OFS='\t' '$3 == "exon" {print $1, $4-1, $5, $9}' "${read_id}.gtf" > "${read_id}.bed"
-
+                
                 # rm a lot of things
                 rm "fastp.json"
                 rm "${read_id}.sra"
