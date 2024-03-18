@@ -35,11 +35,11 @@ while IFS= read -r line || [ -n "$line" ]; do
             echo "Reference Genome: $reference_genome"
 
             # Create directory for this sample
-            mkdri -p "data/samples/sample_${index}"
+            mkdir -p "data/samples/sample_${index}"
             cd "data/samples/sample_${index}"
 
             # Grab .fasta & .gtf file using get_the_reference_genome.py python script
-            python3 ../../../sctipts/python_scripts/get_the_reference_genome.py "${reference_genome}" "${email}"
+            python3 ../../../scripts/python_scripts/get_the_reference_genome.py "${reference_genome}" "${email}"
 
             # Make directory gor index files
             mkdir index
@@ -65,13 +65,13 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # Get reads quality
                 fastq-dump "${read_id}.sra"
 
+                # Make FastQC analysis, save html doc for report
+                fastqc "${read_id}.fastq"
+
                 # Remove reads with low quality &
                 # discard remaining adapters &
                 # generate fastp report in html format 
                 fastp -i "${read_id}.fastq" -o "${read_id}_fastp.fastq" -h "${read_id}_fastp_report.html"
-
-                # Make FastQC analysis, save html doc for report
-                fastqc "${read_id}_fastp.fastq"
 
                 # Align reads to the reference genome & save align results to .txt file
                 bowtie2 --local -p 6 -x "../index/${reference_genome}_index" -U "${read_id}_fastp.fastq" \
@@ -84,15 +84,15 @@ while IFS= read -r line || [ -n "$line" ]; do
                 samtools index "${read_id}_fastp_mapping_sorted.bam"
 
                 # Gemove rRNA from raw reads
-                python3 ../../../../sctipts/python_scripts/remove_rrna.py \
-                    "${read_id}_fastp_mapping_sorted.bam" ../"reference_genome_${reference_genome}_rRNA_coordinates.bed" \
+                python3 ../../../../scripts/python_scripts/remove_rrna.py \
+                    "${read_id}_fastp_mapping_sorted.bam" "../reference_genome_${reference_genome}_rRNA_coordinates.bed" \
                     "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
 
                 # Index reads with no rRNA reads
                 samtools index "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
 
                 # Grab CIGAR column from reads & same it
-                python3 ../../../../sctipts/python_scripts/extract_CIGAR_info.py \
+                python3 ../../../../scripts/python_scripts/extract_CIGAR_info.py \
                     "${read_id}_fastp_mapping_sorted_no_rRNA.bam" "${read_id}_CIGAR_info.txt"
 
                 # Convert this reads into .fastq format to make sure our data is clean using FastQC
@@ -103,6 +103,8 @@ while IFS= read -r line || [ -n "$line" ]; do
 
                 # Get annotations based on this reads
                 stringtie "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -o "${read_id}.gtf"
+
+                awk -v OFS='\t' '$3 == "exon" {print $1, $4-1, $5, $9}' "${read_id}.gtf" > "${read_id}.bed"
 
                 # rm a lot of things
                 rm "fastp.json"
@@ -120,7 +122,7 @@ while IFS= read -r line || [ -n "$line" ]; do
             done
             echo
 
-            # Merge all reads -> get conservative sites 
+            # Merge all reads
             find . -name '*.gtf' > "${reference_genome}_gtf_files.txt"
             stringtie --merge -o "${reference_genome}_gtf_merged.gtf" "${reference_genome}_gtf_files.txt"
 

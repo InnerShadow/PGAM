@@ -4,7 +4,7 @@
 import argparse
 import pysam
 
-def remove_rrna_reads(bam_file, bed_file, output_bam, offset = 50):
+def remove_rrna_reads(bam_file, bed_file, output_bam, offset = 60):
     bam = pysam.AlignmentFile(bam_file, "rb")
     
     rrna_regions = []
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     parser.add_argument('bam_file', type = str, help = 'Input BAM file')
     parser.add_argument('bed_file', type = str, help = 'Input BED file with rRNA coordinates')
     parser.add_argument('output_bam', type = str, help = 'Output BAM file')
-    parser.add_argument('--offset', type = int, default = 50, help = 'Offset value for rRNA regions (default: 50)')
+    parser.add_argument('--offset', type = int, default = 60, help = 'Offset value for rRNA regions (default: 60)')
     args = parser.parse_args()
 
     remove_rrna_reads(args.bam_file, args.bed_file, args.output_bam, args.offset)
