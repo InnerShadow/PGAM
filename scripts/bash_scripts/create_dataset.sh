@@ -102,7 +102,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                 fastqc "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
                 # Get annotations based on this reads
-                stringtie "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -o "${read_id}.gtf"
+                stringtie "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -g 0 --conservative -s 5 -o "${read_id}.gtf"
 
                 # Remove a lot of things
                 rm "fastp.json"
