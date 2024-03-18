@@ -84,7 +84,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                 samtools index "${read_id}_fastp_mapping_sorted.bam"
 
                 # Gemove rRNA from raw reads
-                python3 ../../../sctipts/python_scripts/remove_rrna.py \
+                python3 ../../../../sctipts/python_scripts/remove_rrna.py \
                     "${read_id}_fastp_mapping_sorted.bam" ../"reference_genome_${reference_genome}_rRNA_coordinates.bed" \
                     "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
 
