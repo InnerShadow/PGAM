@@ -48,8 +48,8 @@ while IFS= read -r line || [ -n "$line" ]; do
             bowtie2-build "reference_genome_${reference_genome}.fasta" "index/${reference_genome}_index"
 
             # Get rRNA coordinates from .gtf file
-            awk '$3 == "rRNA" {print $1 "\t" $4-1 "\t" $5}' "reference_genome_${reference_genome}.gff3" \
-                > "reference_genome_${reference_genome}_rRNA_coordinates.bed"
+            # awk '$3 == "rRNA" {print $1 "\t" $4-1 "\t" $5}' "reference_genome_${reference_genome}.gff3" \
+            #     > "reference_genome_${reference_genome}_rRNA_coordinates.bed"
 
             echo "Raw Reads:"
             for read_id in "${raw_reads[@]}"; do
@@ -84,25 +84,25 @@ while IFS= read -r line || [ -n "$line" ]; do
                 samtools index "${read_id}_fastp_mapping_sorted.bam"
 
                 # Gemove rRNA from raw reads
-                python3 ../../../../scripts/python_scripts/remove_rrna.py \
-                    "${read_id}_fastp_mapping_sorted.bam" "../reference_genome_${reference_genome}_rRNA_coordinates.bed" \
-                    "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
+                # python3 ../../../../scripts/python_scripts/remove_rrna.py \
+                #     "${read_id}_fastp_mapping_sorted.bam" "../reference_genome_${reference_genome}_rRNA_coordinates.bed" \
+                #     "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
 
-                # Index reads with no rRNA reads
-                samtools index "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
+                # # Index reads with no rRNA reads
+                # samtools index "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
 
                 # Grab CIGAR column from reads & same it
                 python3 ../../../../scripts/python_scripts/extract_CIGAR_info.py \
-                    "${read_id}_fastp_mapping_sorted_no_rRNA.bam" "${read_id}_CIGAR_info.txt"
+                    "${read_id}_fastp_mapping_sorted.bam" "${read_id}_CIGAR_info.txt"
 
                 # Convert this reads into .fastq format to make sure our data is clean using FastQC
-                bedtools bamtofastq -i "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -fq "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
+                # bedtools bamtofastq -i "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -fq "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
-                # Check reads using FastQC, save html doc for report
-                fastqc "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
+                # # Check reads using FastQC, save html doc for report
+                # fastqc "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
                 # Get annotations based on this reads
-                stringtie "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -g 0 --conservative -s 5 -o "${read_id}.gtf"
+                stringtie "${read_id}_fastp_mapping_sorted.bam" -g 0 --conservative -s 5 -o "${read_id}.gtf"
 
                 # Remove a lot of things
                 rm "fastp.json"
@@ -112,8 +112,8 @@ while IFS= read -r line || [ -n "$line" ]; do
                 rm "${read_id}_fastp_mapping.bam"
                 rm "${read_id}_fastp_mapping_sorted.bam"
                 rm "${read_id}_fastp_mapping_sorted.bam.bai"
-                rm "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
-                rm "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
+                # rm "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
+                # rm "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
                 cd ..
 
