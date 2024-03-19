@@ -3,51 +3,49 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 
-
 def parse_cigar_file(cigar_file):
-    {'M': [], 'I': [], 'D': [], 'N': [], 'S': [], 'H': [], 'P': [], '=': [], 'X': []}
-    cigar_M = []
-    cigar_I = []
-    cigar_D = []
-    cigar_N = []
-    cigar_S = []
-    cigar_H = []
-    cigar_P = [] 
-    cigar_X = []
+    cigar_counts = {'M': 0, 'I': 0, 'D': 0, 'N': 0, 'S': 0}
 
     with open(cigar_file, "r") as file:
         for line in file:
             cigar = line.strip()
             if cigar:
-                cigar_operations = [(int(''.join(filter(str.isdigit, op))), op) for op in cigar.split("M") if op]
-                for op_len, op_type in cigar_operations:
-                    cigar_counts[op_type].append(op_len)
+                string = ""
+                for c in cigar:
+                    if c.isdigit():
+                        string += c
+                    else:
+                        cigar_counts[c] += int(string)
+                        string = ""
 
     return cigar_counts
 
-def plot_boxplot(cigar_counts, output_png):
-    df = pd.DataFrame(cigar_counts)
-    sns.set(style="whitegrid")
-    plt.figure(figsize=(10, 6))
-    sns.boxplot(data=df)
-    plt.xlabel('CIGAR Operation')
-    plt.ylabel('Count')
-    plt.title('Distribution of CIGAR Operations')
-    plt.savefig(output_png)  # Save box plot as PNG
-    plt.show()
+
+def plot_pie_chart(cigar_file, cigar_counts, output_png):
+    labels = list(cigar_counts.keys())
+    values = list(cigar_counts.values())
+
+    colors = sns.color_palette('pastel')[0:len(labels)]
+
+    plt.figure(figsize = (10, 6))
+    plt.pie(values, labels = labels, autopct = '%1.1f%%', startangle = 140, colors = colors, wedgeprops = {'edgecolor': 'black'})
+    plt.title(f"CIGAR Operation Distribution for {cigar_file.split('_')[0]}", fontsize = 16)
+    plt.axis('equal')
+    plt.legend(loc = "best", fontsize=12)
+    plt.savefig(output_png)
+    # plt.show()
+
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(description = "Generate box plot for CIGAR operations.")
-    # parser.add_argument("cigar_file", help = "Path to the file containing CIGAR strings")
-    # parser.add_argument("output_png", help = "Path to save the box plot PNG file")
+    parser = argparse.ArgumentParser(description = "Generate pie chart for CIGAR operations.")
+    parser.add_argument("cigar_file", help = "Path to the file containing CIGAR strings")
+    parser.add_argument("output_png", help = "Path to save the pie chart PNG file")
 
-    # args = parser.parse_args()
+    args = parser.parse_args()
 
-    # cigar_file = args.cigar_file
-    # output_png = args.output_png
-
-    cigar_file = "ERR12100549_CIGAR_info.txt"
-    output_png = "tt.png"
+    cigar_file = args.cigar_file
+    output_png = args.output_png
 
     cigar_counts = parse_cigar_file(cigar_file)
-    plot_boxplot(cigar_counts, output_png)
+    plot_pie_chart(cigar_file, cigar_counts, output_png)
+

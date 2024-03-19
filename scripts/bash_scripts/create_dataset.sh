@@ -95,6 +95,9 @@ while IFS= read -r line || [ -n "$line" ]; do
                 python3 ../../../../scripts/python_scripts/extract_CIGAR_info.py \
                     "${read_id}_fastp_mapping_sorted.bam" "${read_id}_CIGAR_info.txt"
 
+                python3 ../../../../scripts/python_scripts/parse_cigar_file.py \
+                    "${read_id}_CIGAR_info.txt" "${read_id}_CIGAR_plot.png"
+
                 # Convert this reads into .fastq format to make sure our data is clean using FastQC
                 # bedtools bamtofastq -i "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -fq "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
@@ -109,6 +112,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                 rm "${read_id}.sra"
                 rm "${read_id}.fastq"
                 rm "${read_id}_fastp.fastq"
+                rm "${read_id}_CIGAR_info.txt"
                 rm "${read_id}_fastp_mapping.bam"
                 rm "${read_id}_fastp_mapping_sorted.bam"
                 rm "${read_id}_fastp_mapping_sorted.bam.bai"

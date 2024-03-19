@@ -12,15 +12,15 @@ def get_the_reference_genome(assembly_id, email, output_folder_id):
     genome_data = genome_handle.read()
     genome_handle.close()
 
-    annotation_handle = Entrez.efetch(db = "nucleotide", id = assembly_id, rettype = "gff3", retmode = "text")
-    annotation_data = annotation_handle.read()
-    annotation_handle.close()
+    # annotation_handle = Entrez.efetch(db = "nucleotide", id = assembly_id, rettype = "gff3", retmode = "text")
+    # annotation_data = annotation_handle.read()
+    # annotation_handle.close()
 
     with open(os.path.join(output_path, f"reference_genome_{assembly_id}.fasta"), "w") as genome_file:
         genome_file.write(genome_data)
 
-    with open(os.path.join(output_path, f"reference_genome_{assembly_id}.gff3"), "w") as annotation_file:
-        annotation_file.write(annotation_data)
+    # with open(os.path.join(output_path, f"reference_genome_{assembly_id}.gff3"), "w") as annotation_file:
+    #     annotation_file.write(annotation_data)
 
 
 if __name__ == "__main__":
