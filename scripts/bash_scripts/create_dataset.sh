@@ -95,6 +95,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                 python3 ../../../../scripts/python_scripts/extract_CIGAR_info.py \
                     "${read_id}_fastp_mapping_sorted.bam" "${read_id}_CIGAR_info.txt"
 
+                # Create pie chart for this CIGAR 
                 python3 ../../../../scripts/python_scripts/parse_cigar_file.py \
                     "${read_id}_CIGAR_info.txt" "${read_id}_CIGAR_plot.png"
 
