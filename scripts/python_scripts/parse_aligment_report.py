@@ -35,6 +35,13 @@ def find_files(directory):
                 yield os.path.join(root, file)
 
 
+def find_full_files(directory):
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith('_alignments_report.txt'):
+                yield root + file
+
+
 if __name__ == '__main__':
     all_alignment_data = pd.DataFrame()
     outliers = []
@@ -44,22 +51,22 @@ if __name__ == '__main__':
         all_alignment_data = pd.concat([all_alignment_data, alignment_data])
 
 
-    for i, file_path in enumerate(find_files("data/samples/")):
+    for i, file_path in enumerate(find_full_files("data/samples/")):
         for j in ['aligned >1 times', 'overall alignment rate']:
             q1 = all_alignment_data[j].quantile(0.25)
             q3 = all_alignment_data[j].quantile(0.75)
             if float(all_alignment_data[j].iloc[i]) < q1 - 1.5 * (q3 - q1):
-                outliers.append(f'{os.path.basename(file_path)} ---------- { j }')
+                outliers.append(f'{file_path} ---------- { j }')
 
 
     outliers.append("")
 
-    for i, file_path in enumerate(find_files("data/samples/")):
+    for i, file_path in enumerate(find_full_files("data/samples/")):
         for j in ['aligned 0 times', 'exactly 1 time']:
             q1 = all_alignment_data[j].quantile(0.25)
             q3 = all_alignment_data[j].quantile(0.75)
             if float(all_alignment_data[j].iloc[i]) > q3 + 1.5 * (q3 - q1):
-                outliers.append(f'{os.path.basename(file_path)} ---------- { j }')
+                outliers.append(f'{file_path} ---------- { j }')
 
 
     with open("outliers.txt", "w") as f:
