@@ -69,7 +69,7 @@ if __name__ == '__main__':
                 outliers.append(f'{file_path} ---------- { j }')
 
 
-    with open("outliers.txt", "w") as f:
+    with open("data/reports/outliers.txt", "w") as f:
         for outlier in outliers:
             f.write(outlier + "\n")
 
@@ -80,6 +80,6 @@ if __name__ == '__main__':
         plt.title('Alignment Percentages')
         plt.xlabel(f'Number of samples that {i}')
         plt.ylabel('Percentage')
-        plt.savefig(f"{i}_all_samples_boxplot.png")
+        plt.savefig(f"data/reports/{i}_all_samples_boxplot.png")
         plt.close()
 

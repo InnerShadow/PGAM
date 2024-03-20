@@ -1,0 +1,5 @@
+data/samples/sample_0/Read_0ERR12100541_alignments_report.txt ---------- aligned >1 times
+data/samples/sample_0/Read_0ERR12100541_alignments_report.txt ---------- overall alignment rate
+
+data/samples/sample_0/Read_0ERR12100541_alignments_report.txt ---------- aligned 0 times
+data/samples/sample_0/Read_0ERR12100541_alignments_report.txt ---------- exactly 1 time
