@@ -1,0 +1,1 @@
+# Folder for suck reports as parse_aligment_report.py
