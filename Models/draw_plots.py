@@ -4,7 +4,6 @@ import seaborn as sns
 
 from sklearn.metrics import roc_curve, precision_recall_curve, confusion_matrix
 
-
 def draw_metrics_plot(train_dic, val_dic, test_dic):
     metrics_names = ['Loss', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'Kappa', 'MCC', 'ROC AUC']
 

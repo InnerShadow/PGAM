@@ -139,8 +139,6 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             except Exception as e:
                 test_history['roc_auc'].append(0)
 
-        print(k)
-
         for it in ['loss', 'accuracy', 'precision', 'recall', 'f1', 'kappa', 'mcc', 'roc_auc']:
             global_train_history[it].append(np.sum(train_history[it]) / j)
             global_val_history[it].append(np.sum(val_history[it]) / j)

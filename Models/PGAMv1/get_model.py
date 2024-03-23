@@ -1,7 +1,6 @@
 from keras.models import Model
 from keras.layers import LSTM, Dense, Embedding, Input, BatchNormalization, Dropout
 
-
 def get_model(n_window, vocab_size, embedding_size):
     input = Input(shape = (n_window, ))
     body = Embedding(input_dim = vocab_size, output_dim = embedding_size)(input)
