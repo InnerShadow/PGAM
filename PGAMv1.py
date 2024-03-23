@@ -3,7 +3,7 @@ from Models.find_files import find_files
 from Models.parse_gtf_file import parse_gtf_file
 from Models.read_fasta_file import read_fasta_file
 
-from Models.PGAMv1.get_training_data import get_training_data
+from Models.PGAMv1.train_model import train_model
 from Models.PGAMv1.get_model import get_model
 
 import argparse
@@ -59,4 +59,5 @@ if __name__ == '__main__':
     encoded_sequences_array = np.array(encoded_sequences)
 
     model = get_model(args.n_window, len(nucleotide_codes) + 1, args.embedding_size)
+    model = train_model(model, args.epochs, encoded_sequences_array, exon_array, args.n_window, args.n_samples_per_epoch, args.n_times, args.batch_size)
 
