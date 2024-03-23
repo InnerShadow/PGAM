@@ -1,7 +1,6 @@
 import argparse
 import seaborn as sns
 import matplotlib.pyplot as plt
-import pandas as pd
 
 def parse_cigar_file(cigar_file):
     cigar_counts = {'M': 0, 'I': 0, 'D': 0, 'N': 0, 'S': 0}

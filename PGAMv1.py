@@ -25,8 +25,6 @@ if __name__ == '__main__':
     parser.add_argument("epochs", type = int, help = "The number of epochs")
     parser.add_argument("embedding_size", type = int, help = "The number of outputs neurons on the embending layer.")
     parser.add_argument("n_times", type = int, help = "The number of times that n_samples_per_epoch will fit on model")
-    parser.add_argument("batch_size", type = int, help = "The size of the mini-butch")
-    parser.add_argument("batch_size", type = int, help = "The size of the mini-butch")
 
     args = parser.parse_args()
 
@@ -48,14 +46,14 @@ if __name__ == '__main__':
         for gene_id, exon_positions in exons_info.items():
             for start, end in exon_positions:
                 exon_array[i, start - 1 : end] = 1
-        print(exons_info)
+        # print(exons_info)
 
         exons_info.clear()
 
 
     encoded_sequences = []
     for sequence in sequences:
-        encoded_sequences.append(encode_sequence(sequence))
+        encoded_sequences.append(encode_sequence(sequence, nucleotide_codes))
 
     sequences.clear()
     encoded_sequences_array = np.array(encoded_sequences)
