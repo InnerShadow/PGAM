@@ -59,5 +59,5 @@ if __name__ == '__main__':
     encoded_sequences_array = np.array(encoded_sequences)
 
     model = get_model(args.n_window, len(nucleotide_codes) + 1, args.embedding_size)
-    model = train_model(model, args.epochs, encoded_sequences_array, exon_array, args.n_window, args.n_samples_per_epoch, args.n_times, args.batch_size)
+    model = train_model(model, args.epochs, encoded_sequences_array, exon_array, args.n_window, args.n_samples_per_epoch, args.n_times, args.batch_size, nucleotide_codes)
 

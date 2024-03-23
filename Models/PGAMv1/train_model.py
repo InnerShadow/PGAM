@@ -45,7 +45,7 @@ def get_test_data():
     return encoded_sequences_array, exon_array
 
 
-def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_samples_per_epoch, n_times, batch_size):
+def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_samples_per_epoch, n_times, batch_size, nucleotide_codes):
     X_test, y_test = get_test_data()
 
     mlflow.set_tracking_uri("./Models/PGAMv1/mlflowRuns")
@@ -88,7 +88,7 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
 
     for i in range(epochs):
         print(f"Global Epoch: {i + 1}")
-        for j, (X_feature, y_target) in enumerate(get_training_data(encoded_sequences_array, exon_array, n_window, n_samples_per_epoch)):
+        for j, (X_feature, y_target) in enumerate(get_training_data(encoded_sequences_array, exon_array, n_window, n_samples_per_epoch, nucleotide_codes)):
             print(f"Local Epoch: {j + 1}")
             y_target_one_hot = to_categorical(y_target, num_classes = 2)
             X_train, X_val, y_train, y_val = train_test_split(X_feature, y_target_one_hot, train_size = 0.8, random_state = 1212)
@@ -116,7 +116,7 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             val_history['mcc'].append(matthews_corrcoef(np.argmax(y_val, axis = 1), val_predictions_classes))
             val_history['roc_auc'].append(roc_auc_score(y_val, val_predictions))
 
-        for k, (X_feature, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch)):
+        for k, (X_feature, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
             history = model.evaluate(X_feature, y_target)
 
             test_history['loss'].append(history.history['loss'])
