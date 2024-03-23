@@ -177,3 +177,4 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
     mlflow.end_run()
 
     return model
+
