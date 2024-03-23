@@ -103,7 +103,10 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             train_history['f1'].append(f1_score(np.argmax(y_train, axis = 1), train_predictions_classes))
             train_history['kappa'].append(cohen_kappa_score(np.argmax(y_train, axis = 1), train_predictions_classes))
             train_history['mcc'].append(matthews_corrcoef(np.argmax(y_train, axis = 1), train_predictions_classes))
-            train_history['roc_auc'].append(roc_auc_score(y_train, train_predictions))
+            try:
+                train_history['roc_auc'].append(roc_auc_score(y_train, train_predictions))
+            except Exception as e:
+                train_history['roc_auc'].append(0)
             
             val_history['loss'].append(history.history['val_loss'])
             val_predictions = model.predict(X_val)
@@ -114,7 +117,10 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             val_history['f1'].append(f1_score(np.argmax(y_val, axis = 1), val_predictions_classes))
             val_history['kappa'].append(cohen_kappa_score(np.argmax(y_val, axis = 1), val_predictions_classes))
             val_history['mcc'].append(matthews_corrcoef(np.argmax(y_val, axis = 1), val_predictions_classes))
-            val_history['roc_auc'].append(roc_auc_score(y_val, val_predictions))
+            try:
+                val_history['roc_auc'].append(roc_auc_score(y_val, val_predictions))
+            except Exception as e:
+                val_history['roc_auc'].append(0)
 
         for k, (X_feature, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
             history = model.evaluate(X_feature, y_target)
@@ -128,7 +134,10 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             test_history['f1'].append(f1_score(np.argmax(y_target, axis = 1), test_predictions_classes))
             test_history['kappa'].append(cohen_kappa_score(np.argmax(y_target, axis = 1), test_predictions_classes))
             test_history['mcc'].append(matthews_corrcoef(np.argmax(y_target, axis = 1), test_predictions_classes))
-            test_history['roc_auc'].append(roc_auc_score(y_target, val_predictions))        
+            try:
+                test_history['roc_auc'].append(roc_auc_score(y_target, val_predictions))
+            except Exception as e:
+                test_history['roc_auc'].append(0)
 
 
         for it in ['loss', 'accuracy', 'precision', 'recall', 'f1', 'kappa', 'mcc', 'roc_auc']:
@@ -137,9 +146,14 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
                 global_val_history[it].append(np.sum(val_history[it]) / j)
                 global_test_history[it].append(np.sum(test_history[it]) / k)
             else:
-                global_train_history[it].append(np.sum(np.mean(train_history[it], axis = 1)) / j)
-                global_train_history[it].append(np.sum(np.mean(val_history[it], axis = 1)) / j)
-                global_train_history[it].append(np.sum(np.mean(test_history[it], axis = 1)) / k)
+                means = [sum(sublist) / len(sublist) for sublist in train_history[it]]
+                global_train_history[it].append(np.sum(means) / j)
+
+                means = [sum(sublist) / len(sublist) for sublist in global_train_history[it]]
+                global_train_history[it].append(np.sum(means) / j)
+
+                means = [sum(sublist) / len(sublist) for sublist in global_train_history[it]]
+                global_train_history[it].append(np.sum(means) / k)
             
             mlflow.log_metric(f"train_{it}", global_train_history[it][-1])
             mlflow.log_metric(f"val_{it}", global_val_history[it][-1])
@@ -149,12 +163,17 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             val_history[it].clear()
             test_history[it].clear()
 
+    for k, (X_feature, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
+        predicted = model.predict(X_feature)
 
-    predictions = model.predict(X_test)
+        predictions = np.concatenate([predictions, predicted])
+        y_true = np.concatenate([y_true, to_categorical(y_target, num_classes = 2)])
+
+
     draw_metrics_plot(train_history, val_history, test_history)
-    draw_roc_curve(y_test, predictions)
-    draw_precision_recall_curve(y_test, predictions)
-    draw_confusion_matrix(y_test, predictions)
+    draw_roc_curve(y_true, predictions)
+    draw_precision_recall_curve(y_true, predictions)
+    draw_confusion_matrix(y_true, predictions)
 
     mlflow.keras.log_model(model, "PGAMv1")
     mlflow.end_run()
