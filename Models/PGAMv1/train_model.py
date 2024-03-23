@@ -155,6 +155,9 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             test_history[it].clear()
 
 
+    predictions = np.array([])
+    y_true = np.array([])
+
     for k, (X_feature, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
         predicted = model.predict(X_feature)
 
