@@ -17,7 +17,7 @@ def draw_metrics_plot(train_dic, val_dic, test_dic):
     test_metrics = [test_dic['loss'], test_dic['accuracy'], test_dic['precision'], test_dic['recall'], test_dic['f1'],
                     test_dic['kappa'], test_dic['mcc'], test_dic['roc_auc']]
 
-    for train_metric, val_metric, test_metric, metric_name, key in zip(train_metrics, val_metrics, test_metrics, metrics_names):
+    for train_metric, val_metric, test_metric, metric_name in zip(train_metrics, val_metrics, test_metrics, metrics_names):
         plt.figure(figsize = (8, 5))
         plt.plot(train_metric, label = f'Train {metric_name}', color = 'green', linestyle = '--', alpha = 0.6)
         plt.plot(val_metric, label = f'Validation {metric_name}', color = 'blue', linestyle = ':', alpha = 0.8)
