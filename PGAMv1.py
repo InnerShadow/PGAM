@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    fasta_files, gtf_files = find_files('./', 'samples')
+    fasta_files, gtf_files = find_files('./', 'samples', 'sample_*')
 
     sequences = []
     for fasta_file in fasta_files:
