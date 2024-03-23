@@ -1,2 +1,4 @@
 PGAMenv
 *__pycache__
+*mlflowRuns
+*TensorBoardRuns
