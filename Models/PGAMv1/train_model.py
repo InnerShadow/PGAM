@@ -13,7 +13,7 @@ from Models.parse_gtf_file import parse_gtf_file
 from Models.encode_sequence import encode_sequence
 from Models.draw_plots import *
 
-def get_test_data():
+def get_test_data(nucleotide_codes):
     fasta_files, gtf_files = find_files('./', 'test_sample', 'test_sample')
     sequences = []
     for fasta_file in fasta_files:
@@ -30,14 +30,13 @@ def get_test_data():
         for gene_id, exon_positions in exons_info.items():
             for start, end in exon_positions:
                 exon_array[i, start - 1 : end] = 1
-        print(exons_info)
 
         exons_info.clear()
 
 
     encoded_sequences = []
     for sequence in sequences:
-        encoded_sequences.append(encode_sequence(sequence))
+        encoded_sequences.append(encode_sequence(sequence, nucleotide_codes))
 
     sequences.clear()
     encoded_sequences_array = np.array(encoded_sequences)
@@ -46,7 +45,7 @@ def get_test_data():
 
 
 def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_samples_per_epoch, n_times, batch_size, nucleotide_codes):
-    X_test, y_test = get_test_data()
+    X_test, y_test = get_test_data(nucleotide_codes)
 
     mlflow.set_tracking_uri("./Models/PGAMv1/mlflowRuns")
     mlflow.set_experiment("PGAMv1")
@@ -123,17 +122,18 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
                 val_history['roc_auc'].append(0)
 
         for k, (X_feature, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
-            history = model.evaluate(X_feature, y_target)
-
-            test_history['loss'].append(history.history['loss'])
-            test_predictions = model.predict(X_val)
+            y_target_one_hot = to_categorical(y_target, num_classes = 2)
+            history = model.evaluate(X_feature, y_target_one_hot)
+            
+            test_history['loss'].append(history[0])
+            test_predictions = model.predict(X_feature)
             test_predictions_classes = np.argmax(test_predictions, axis = 1)
-            test_history['accuracy'].append(accuracy_score(np.argmax(y_target, axis = 1), test_predictions_classes))
-            test_history['precision'].append(precision_score(np.argmax(y_target, axis = 1), test_predictions_classes))
-            test_history['recall'].append(recall_score(np.argmax(y_target, axis = 1), test_predictions_classes))
-            test_history['f1'].append(f1_score(np.argmax(y_target, axis = 1), test_predictions_classes))
-            test_history['kappa'].append(cohen_kappa_score(np.argmax(y_target, axis = 1), test_predictions_classes))
-            test_history['mcc'].append(matthews_corrcoef(np.argmax(y_target, axis = 1), test_predictions_classes))
+            test_history['accuracy'].append(accuracy_score(np.argmax(y_target_one_hot, axis = 1), test_predictions_classes))
+            test_history['precision'].append(precision_score(np.argmax(y_target_one_hot, axis = 1), test_predictions_classes))
+            test_history['recall'].append(recall_score(np.argmax(y_target_one_hot, axis = 1), test_predictions_classes))
+            test_history['f1'].append(f1_score(np.argmax(y_target_one_hot, axis = 1), test_predictions_classes))
+            test_history['kappa'].append(cohen_kappa_score(np.argmax(y_target_one_hot, axis = 1), test_predictions_classes))
+            test_history['mcc'].append(matthews_corrcoef(np.argmax(y_target_one_hot, axis = 1), test_predictions_classes))
             try:
                 test_history['roc_auc'].append(roc_auc_score(y_target, val_predictions))
             except Exception as e:
