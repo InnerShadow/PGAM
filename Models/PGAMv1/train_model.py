@@ -168,7 +168,7 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
     predictions = np.concatenate(predictions)
     y_true = np.concatenate(y_true)
 
-    draw_metrics_plot(train_history, val_history, test_history)
+    draw_metrics_plot(global_train_history, global_val_history, global_test_history)
     draw_roc_curve(y_true, predictions)
     draw_precision_recall_curve(y_true, predictions)
     draw_confusion_matrix(y_true, predictions)
