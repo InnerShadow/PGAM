@@ -6,7 +6,8 @@ def extract_CIGAR_info(input_bam, output_txt):
         with open(output_txt, "w") as output:
             for read in bam:
                 sigar = read.cigarstring
-                output.write(sigar + "\n")
+                if sigar is not None:
+                    output.write(sigar + "\n")
 
 
 if __name__ == "__main__":
