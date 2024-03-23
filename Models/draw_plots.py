@@ -69,4 +69,5 @@ def draw_confusion_matrix(y, predictions):
     plt.xlabel('Predicted Label')
     plt.ylabel('True Label')
     plt.savefig('./Models/PGAMv1/reports/confusion_matrix_plot.png')
-    plt.show()
+    # plt.show()
+
