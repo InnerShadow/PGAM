@@ -162,11 +162,11 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
         predicted = model.predict(X_feature)
 
         predictions.append(predicted)
-        y_true.append(to_categorical(y_target, num_classes=2))
+        y_true.append(to_categorical(y_target, num_classes = 2))
+
 
     predictions = np.concatenate(predictions)
     y_true = np.concatenate(y_true)
-
 
     draw_metrics_plot(train_history, val_history, test_history)
     draw_roc_curve(y_true, predictions)
