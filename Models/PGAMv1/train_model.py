@@ -155,14 +155,17 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             test_history[it].clear()
 
 
-    predictions = np.array([[]])
-    y_true = np.array([[]])
+    predictions = []
+    y_true = []
 
     for k, (X_feature, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
         predicted = model.predict(X_feature)
 
-        predictions = np.concatenate([predictions, predicted])
-        y_true = np.concatenate([y_true, to_categorical(y_target, num_classes = 2)])
+        predictions.append(predicted)
+        y_true.append(to_categorical(y_target, num_classes=2))
+
+    predictions = np.concatenate(predictions)
+    y_true = np.concatenate(y_true)
 
 
     draw_metrics_plot(train_history, val_history, test_history)
