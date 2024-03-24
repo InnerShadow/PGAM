@@ -6,7 +6,7 @@ from keras.callbacks import TensorBoard
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, matthews_corrcoef, roc_auc_score
 
-from Models.PGAMv2.get_training_data import get_training_data
+from Models.PGAMv3.get_training_data import get_training_data
 from Models.find_files import find_files
 from Models.read_fasta_file import read_fasta_file
 from Models.parse_gtf_file import parse_gtf_file
@@ -47,8 +47,8 @@ def get_test_data(nucleotide_codes):
 def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_samples_per_epoch, n_times, batch_size, nucleotide_codes):
     X_test, y_test = get_test_data(nucleotide_codes)
 
-    mlflow.set_tracking_uri("./Models/PGAMv2/mlflowRuns")
-    mlflow.set_experiment("PGAMv2")
+    mlflow.set_tracking_uri("./Models/PGAMv3/mlflowRuns")
+    mlflow.set_experiment("PGAMv3")
 
     mlflow.log_param("n_window", n_window)
     mlflow.log_param("n_samples_per_epoch", n_samples_per_epoch)
@@ -87,14 +87,14 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
 
     for i in range(epochs):
         print(f"Global Epoch: {i + 1}")
-        for j, (X_feature, y_target) in enumerate(get_training_data(encoded_sequences_array, exon_array, n_window, n_samples_per_epoch, nucleotide_codes)):
+        for j, (X_feature_1, X_feature_2, y_target) in enumerate(get_training_data(encoded_sequences_array, exon_array, n_window, n_samples_per_epoch, nucleotide_codes)):
             print(f"Local Epoch: {j + 1}")
             y_target_one_hot = to_categorical(y_target, num_classes = 2)
-            X_train, X_val, y_train, y_val = train_test_split(X_feature, y_target_one_hot, train_size = 0.8, random_state = 1212)
-            history = model.fit(X_train, y_train, epochs = n_times, batch_size = batch_size, validation_data = [X_val, y_val], callbacks = [tensorboard_callback])
+            X_1_train, X_1_val, X_2_train, X_2_val,  y_train, y_val = train_test_split(X_feature_1, X_feature_2, y_target_one_hot, train_size = 0.8, random_state = 1212)
+            history = model.fit([X_1_train, X_2_train], y_train, epochs = n_times, batch_size = batch_size, validation_data = [[X_1_val, X_2_val], y_val], callbacks = [tensorboard_callback])
             
             train_history['loss'].append(np.mean(history.history['loss']))
-            train_predictions = model.predict(X_train)
+            train_predictions = model.predict([X_1_train, X_2_train])
             train_predictions_classes = np.argmax(train_predictions, axis = 1)
             train_history['accuracy'].append(accuracy_score(np.argmax(y_train, axis = 1), train_predictions_classes))
             train_history['precision'].append(precision_score(np.argmax(y_train, axis = 1), train_predictions_classes))
@@ -108,7 +108,7 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
                 train_history['roc_auc'].append(0)
             
             val_history['loss'].append(np.mean(history.history['val_loss']))
-            val_predictions = model.predict(X_val)
+            val_predictions = model.predict([X_1_val, X_2_val])
             val_predictions_classes = np.argmax(val_predictions, axis = 1)
             val_history['accuracy'].append(accuracy_score(np.argmax(y_val, axis = 1), val_predictions_classes))
             val_history['precision'].append(precision_score(np.argmax(y_val, axis = 1), val_predictions_classes))
@@ -121,12 +121,12 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             except Exception as e:
                 val_history['roc_auc'].append(0)
 
-        for k, (X_feature, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
+        for k, (X_feature_1, X_feature_2, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
             y_target_one_hot = to_categorical(y_target, num_classes = 2)
-            history = model.evaluate(X_feature, y_target_one_hot)
+            history = model.evaluate([X_feature_1, X_feature_2], y_target_one_hot)
             
             test_history['loss'].append(history[0])
-            test_predictions = model.predict(X_feature)
+            test_predictions = model.predict([X_feature_1, X_feature_2])
             test_predictions_classes = np.argmax(test_predictions, axis = 1)
             test_history['accuracy'].append(accuracy_score(np.argmax(y_target_one_hot, axis = 1), test_predictions_classes))
             test_history['precision'].append(precision_score(np.argmax(y_target_one_hot, axis = 1), test_predictions_classes))
@@ -156,8 +156,8 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
     predictions = []
     y_true = []
 
-    for k, (X_feature, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
-        predicted = model.predict(X_feature)
+    for k, (X_feature_1, X_feature__2, y_target) in enumerate(get_training_data(X_test, y_test, n_window, n_samples_per_epoch, nucleotide_codes)):
+        predicted = model.predict([X_feature_1, X_feature__2])
 
         predictions.append(predicted)
         y_true.append(to_categorical(y_target, num_classes = 2))
@@ -166,15 +166,15 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
     predictions = np.concatenate(predictions)
     y_true = np.concatenate(y_true)
 
-    draw_metrics_plot(global_train_history, global_val_history, global_test_history, "Model v2.", "./Moedls/PGAMv2/reports/")
-    draw_roc_curve(y_true, predictions, "Model v2.", "./Moedls/PGAMv2/reports/")
-    draw_precision_recall_curve(y_true, predictions, "Model v2.", "./Moedls/PGAMv2/reports/")
-    draw_confusion_matrix(y_true, predictions, "Model v2.", "./Moedls/PGAMv2/reports/")
+    draw_metrics_plot(global_train_history, global_val_history, global_test_history, "Model v3.", "./Moedls/PGAMv2/reports/")
+    draw_roc_curve(y_true, predictions, "Model v3.", "./Moedls/PGAMv3/reports/")
+    draw_precision_recall_curve(y_true, predictions, "Model v3.", "./Moedls/PGAMv3/reports/")
+    draw_confusion_matrix(y_true, predictions, "Model v3.", "./Moedls/PGAMv3/reports/")
 
-    mlflow.keras.log_model(model, "PGAMv2")
+    mlflow.keras.log_model(model, "PGAMv3")
     mlflow.end_run()
 
-    model.save("./Models/PGAMv2/reports/PGAMv2.h5")
+    model.save("./Models/PGAMv3/reports/PGAMv3.h5")
 
     return model
 
