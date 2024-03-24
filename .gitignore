@@ -3,3 +3,4 @@ PGAMenv
 *mlflowRuns
 *TensorBoardRuns
 *.png
+*.h5
