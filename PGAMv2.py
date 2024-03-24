@@ -18,7 +18,7 @@ nucleotide_codes = {
 }
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description = "Train PGAMv1.")
+    parser = argparse.ArgumentParser(description = "Train PGAMv2.")
     parser.add_argument("n_window", type = int ,help = "The number of nucleotides (window size) up to the current nucleotide in the prediction")
     parser.add_argument("n_samples_per_epoch", type = int, help = "The number of samples that will be trained pack by pack")
     parser.add_argument("batch_size", type = int, help = "The size of the mini-butch")
