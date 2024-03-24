@@ -166,10 +166,10 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
     predictions = np.concatenate(predictions)
     y_true = np.concatenate(y_true)
 
-    draw_metrics_plot(global_train_history, global_val_history, global_test_history, "Model v1.", "./Moedls/PGAMv1/reports/")
-    draw_roc_curve(y_true, predictions, "Model v1.", "./Moedls/PGAMv1/reports/")
-    draw_precision_recall_curve(y_true, predictions, "Model v1.", "./Moedls/PGAMv1/reports/")
-    draw_confusion_matrix(y_true, predictions, "Model v1.", "./Moedls/PGAMv1/reports/")
+    draw_metrics_plot(global_train_history, global_val_history, global_test_history, "Model v2.", "./Moedls/PGAMv2/reports/")
+    draw_roc_curve(y_true, predictions, "Model v2.", "./Moedls/PGAMv2/reports/")
+    draw_precision_recall_curve(y_true, predictions, "Model v2.", "./Moedls/PGAMv2/reports/")
+    draw_confusion_matrix(y_true, predictions, "Model v2.", "./Moedls/PGAMv2/reports/")
 
     mlflow.keras.log_model(model, "PGAMv1")
     mlflow.end_run()
