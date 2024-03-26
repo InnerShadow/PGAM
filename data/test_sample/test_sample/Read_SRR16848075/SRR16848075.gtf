@@ -1,4 +1,0 @@
-# stringtie SRR16848075_fastp_mapping_sorted.bam -g 0 --conservative -s 5 -o SRR16848075.gtf
-# StringTie version 2.2.1
-CP068982.1	StringTie	transcript	4078195	4078401	1000	.	.	gene_id "STRG.1"; transcript_id "STRG.1.1"; cov "555577.437500"; FPKM "4827788.500000"; TPM "999999.875000";
-CP068982.1	StringTie	exon	4078195	4078401	1000	.	.	gene_id "STRG.1"; transcript_id "STRG.1.1"; exon_number "1"; cov "555577.437500";

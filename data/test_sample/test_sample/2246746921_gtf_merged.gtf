@@ -1,4 +1,0 @@
-# stringtie --merge -o 2246746921_gtf_merged.gtf 2246746921_gtf_files.txt
-# StringTie version 2.2.1
-CP068982.1	StringTie	transcript	4078181	4078402	1000	.	.	gene_id "MSTRG.1"; transcript_id "MSTRG.1.1"; 
-CP068982.1	StringTie	exon	4078181	4078402	1000	.	.	gene_id "MSTRG.1"; transcript_id "MSTRG.1.1"; exon_number "1"; 
