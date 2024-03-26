@@ -144,13 +144,15 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             global_val_history[it].append(np.sum(val_history[it]) / j)
             global_test_history[it].append(np.sum(test_history[it]) / k)
             
-            mlflow.log_metric(f"train_{it}", global_train_history[it][-1])
-            mlflow.log_metric(f"val_{it}", global_val_history[it][-1])
-            mlflow.log_metric(f"test_{it}", global_test_history[it][-1])
-            
             train_history[it].clear()
             val_history[it].clear()
             test_history[it].clear()
+
+
+    for it in ['loss', 'accuracy', 'precision', 'recall', 'f1', 'kappa', 'mcc', 'roc_auc']:
+        mlflow.log_metric(f"train_{it}", global_train_history[it][-1])
+        mlflow.log_metric(f"val_{it}", global_val_history[it][-1])
+        mlflow.log_metric(f"test_{it}", global_test_history[it][-1])
 
 
     predictions = []
