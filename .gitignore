@@ -4,3 +4,8 @@ PGAMenv
 *TensorBoardRuns
 *.png
 *.h5
+/data/reports/*txt
+/data/reports/1'st_clean/*txt
+/data/reports/2'nd_clean/*txt
+/data/samples/sample_*
+/data/samples/test_sample/*

@@ -46,7 +46,7 @@ while IFS= read -r line || [ -n "$line" ]; do
             mkdir -p "data/samples/sample_${index}"
             cd "data/samples/sample_${index}"
 
-            # Grab .fasta & .gtf file using get_the_reference_genome.py python script
+            # Grab .fasta & .gff3 file using get_the_reference_genome.py python script
             python3 ../../../scripts/python_scripts/get_the_reference_genome.py "${reference_genome}" "${email}"
 
             # Make directory gor index files
@@ -54,10 +54,6 @@ while IFS= read -r line || [ -n "$line" ]; do
 
             # Index reference genome
             bowtie2-build "reference_genome_${reference_genome}.fasta" "index/${reference_genome}_index"
-
-            # Get rRNA coordinates from .gtf file
-            # awk '$3 == "rRNA" {print $1 "\t" $4-1 "\t" $5}' "reference_genome_${reference_genome}.gff3" \
-            #     > "reference_genome_${reference_genome}_rRNA_coordinates.bed"
 
             echo "Raw Reads:"
             for read_id in "${raw_reads[@]}"; do
@@ -91,14 +87,6 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # Index alignments
                 samtools index "${read_id}_fastp_mapping_sorted.bam"
 
-                # Gemove rRNA from raw reads
-                # python3 ../../../../scripts/python_scripts/remove_rrna.py \
-                #     "${read_id}_fastp_mapping_sorted.bam" "../reference_genome_${reference_genome}_rRNA_coordinates.bed" \
-                #     "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
-
-                # # Index reads with no rRNA reads
-                # samtools index "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
-
                 # Grab CIGAR column from reads & same it
                 python3 ../../../../scripts/python_scripts/extract_CIGAR_info.py \
                     "${read_id}_fastp_mapping_sorted.bam" "${read_id}_CIGAR_info.txt"
@@ -106,12 +94,6 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # Create pie chart for this CIGAR 
                 python3 ../../../../scripts/python_scripts/parse_cigar_file.py \
                     "${read_id}_CIGAR_info.txt" "${read_id}_CIGAR_plot.png"
-
-                # Convert this reads into .fastq format to make sure our data is clean using FastQC
-                # bedtools bamtofastq -i "${read_id}_fastp_mapping_sorted_no_rRNA.bam" -fq "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
-
-                # # Check reads using FastQC, save html doc for report
-                # fastqc "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
                 # Get annotations based on this reads
                 stringtie "${read_id}_fastp_mapping_sorted.bam" -g 0 --conservative -s 5 -o "${read_id}.gtf"
@@ -125,8 +107,6 @@ while IFS= read -r line || [ -n "$line" ]; do
                 rm "${read_id}_fastp_mapping.bam"
                 rm "${read_id}_fastp_mapping_sorted.bam"
                 rm "${read_id}_fastp_mapping_sorted.bam.bai"
-                # rm "${read_id}_fastp_mapping_sorted_no_rRNA.bam"
-                # rm "${read_id}_fastp_mapping_sorted_no_rRNA.fastq"
 
                 cd ..
 
