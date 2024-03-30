@@ -18,46 +18,57 @@ nucleotide_codes = {
 }
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description = "Train PGAMv1.")
-    parser.add_argument("n_window", type = int ,help = "The number of nucleotides (window size) up to the current nucleotide in the prediction")
-    parser.add_argument("n_samples_per_epoch", type = int, help = "The number of samples that will be trained pack by pack")
-    parser.add_argument("batch_size", type = int, help = "The size of the mini-butch")
-    parser.add_argument("epochs", type = int, help = "The number of epochs")
-    parser.add_argument("embedding_size", type = int, help = "The number of outputs neurons on the embending layer.")
-    parser.add_argument("n_times", type = int, help = "The number of times that n_samples_per_epoch will fit on model")
+    # parser = argparse.ArgumentParser(description = "Train PGAMv1.")
+    # parser.add_argument("n_window", type = int ,help = "The number of nucleotides (window size) up to the current nucleotide in the prediction")
+    # parser.add_argument("n_samples_per_epoch", type = int, help = "The number of samples that will be trained pack by pack")
+    # parser.add_argument("batch_size", type = int, help = "The size of the mini-butch")
+    # parser.add_argument("epochs", type = int, help = "The number of epochs")
+    # parser.add_argument("embedding_size", type = int, help = "The number of outputs neurons on the embending layer.")
+    # parser.add_argument("n_times", type = int, help = "The number of times that n_samples_per_epoch will fit on model")
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
     fasta_files, gtf_files = find_files('./', 'samples', 'sample_*')
 
-    sequences = []
-    for fasta_file in fasta_files:
-        sequences.append(read_fasta_file(fasta_file))
+    # sequences = []
+    # for fasta_file in fasta_files:
+    #     sequences.append(read_fasta_file(fasta_file))
 
-
-    sequences_array = np.array([list(seq) for seq in sequences], dtype = 'S1')
+    # sequences_array = np.array([list(seq) for seq in sequences], dtype = 'S1')
     
-    exons_info = {}
-    exon_array = np.zeros_like(sequences_array, dtype = int)
+    # exons_info = {} 
+    # exon_array = np.zeros_like(sequences_array, dtype = int)
 
-    for i, gtf_file in enumerate(gtf_files):
-        exons_info.update(parse_gtf_file(gtf_file))
+    # for i, gtf_file in enumerate(gtf_files):
+    #     exons_info.update(parse_gtf_file(gtf_file))
 
-        for gene_id, exon_positions in exons_info.items():
-            for start, end in exon_positions:
-                exon_array[i, start - 1 : end] = 1
-        # print(exons_info)
+    #     for gene_id, exon_positions in exons_info.items():
+    #         for start, end in exon_positions:
+    #             exon_array[i, start - 1 : end] = 1
+    #     # print(exons_info)
 
-        exons_info.clear()
+    #     exons_info.clear()
 
 
-    encoded_sequences = []
-    for sequence in sequences:
-        encoded_sequences.append(encode_sequence(sequence, nucleotide_codes))
+    # encoded_sequences = []
+    # for sequence in sequences:
+    #     encoded_sequences.append(encode_sequence(sequence, nucleotide_codes))
 
-    sequences.clear()
-    encoded_sequences_array = np.array(encoded_sequences)
+    # sequences.clear()
+    # encoded_sequences_array = np.array(encoded_sequences)
 
-    model = get_model(args.n_window, len(nucleotide_codes) + 1, args.embedding_size)
-    model = train_model(model, args.epochs, encoded_sequences_array, exon_array, args.n_window, args.n_samples_per_epoch, args.n_times, args.batch_size, nucleotide_codes)
+    # model = get_model(args.n_window, len(nucleotide_codes) + 1, args.embedding_size)
+    # model = train_model(model, args.epochs, fasta_files, gtf_files, args.n_window, args.n_samples_per_epoch, args.n_times, args.batch_size, nucleotide_codes)
+
+    n_window = 100
+    embedding_size = 128
+    epochs = 6
+    n_samples_per_epoch = 1000
+    n_times = 6
+    batch_size = 32
+
+
+    model = get_model(n_window, len(nucleotide_codes) + 1, embedding_size)
+    model = train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_epoch, n_times, batch_size, nucleotide_codes)
+
 

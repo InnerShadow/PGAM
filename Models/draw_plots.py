@@ -4,7 +4,7 @@ import seaborn as sns
 
 from sklearn.metrics import roc_curve, precision_recall_curve, confusion_matrix
 
-def draw_metrics_plot(train_dic, val_dic, test_dic, model_version, path):
+def draw_metrics_plot(train_dic, val_dic, model_version, path):
     metrics_names = ['Loss', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'Kappa', 'MCC', 'ROC AUC']
 
     train_metrics = [train_dic['loss'], train_dic['accuracy'], train_dic['precision'], train_dic['recall'], train_dic['f1'],
@@ -12,15 +12,12 @@ def draw_metrics_plot(train_dic, val_dic, test_dic, model_version, path):
 
     val_metrics = [val_dic['loss'], val_dic['accuracy'], val_dic['precision'], val_dic['recall'], val_dic['f1'],
                     val_dic['kappa'], val_dic['mcc'], val_dic['roc_auc']]
-    
-    test_metrics = [test_dic['loss'], test_dic['accuracy'], test_dic['precision'], test_dic['recall'], test_dic['f1'],
-                    test_dic['kappa'], test_dic['mcc'], test_dic['roc_auc']]
 
-    for train_metric, val_metric, test_metric, metric_name in zip(train_metrics, val_metrics, test_metrics, metrics_names):
+    for train_metric, val_metric, metric_name in zip(train_metrics, val_metrics, metrics_names):
         plt.figure(figsize = (8, 5))
         plt.plot(train_metric, label = f'{model_version}. Train {metric_name}', color = 'green', linestyle = ':', alpha = 0.6)
         plt.plot(val_metric, label = f'{model_version}. Validation {metric_name}', color = 'blue', linestyle = '--', alpha = 0.8)
-        plt.plot(test_metric, label = f'{model_version}. Test {metric_name}', color = 'red', linestyle = '-', alpha = 1)
+        # plt.plot(test_metric, label = f'{model_version}. Test {metric_name}', color = 'red', linestyle = '-', alpha = 1)
         plt.title(f'{model_version} {metric_name} over epochs')
         plt.xlabel('Epochs')
         plt.ylabel('Value')
