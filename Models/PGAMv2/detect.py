@@ -3,7 +3,7 @@ import numpy as np
 
 from keras.models import load_model
 from keras.utils import to_categorical
-from Models.PGAMv1.get_training_data import get_training_data
+from Models.PGAMv2.get_training_data import get_training_data
 from Models.find_files import find_files
 
 nucleotide_codes = {
@@ -17,7 +17,7 @@ nucleotide_codes = {
 def detect(seq):
     with open('output.gtf', 'w') as file:
         file.write("# PGAM")
-        file.write("\n# PGAMv1")
+        file.write("\n# PGAMv2")
         
         exon_start = None
         exon_end = None
@@ -45,7 +45,7 @@ def detect(seq):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description = "Detect PGAMv1.")
+    parser = argparse.ArgumentParser(description = "Detect PGAMv2.")
     parser.add_argument("n_window", type = int ,help = "The number of nucleotides (window size) up to the current nucleotide in the prediction")
     parser.add_argument("n_samples_per_epoch", type = int, help = "The number of samples that will be trained pack by pack")
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     predictions = []
     # y_true = []
 
-    model = load_model('./Models/PGAMv1/reports/PGAMv1.h5')
+    model = load_model('./Models/PGAMv2/reports/PGAMv2.h5')
     model.summary()
 
     for k, (X_feature, y_target) in enumerate(get_training_data(fasta_test, gtf_test, args.n_window, args.n_samples_per_epoch, nucleotide_codes)):
