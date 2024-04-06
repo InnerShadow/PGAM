@@ -4,7 +4,7 @@ from keras.layers import GRU, Dense, Embedding, Input, BatchNormalization, Dropo
 def get_model(n_window, vocab_size, embedding_size):
     input = Input(shape = (n_window, ))
     body = Embedding(input_dim = vocab_size, output_dim = embedding_size)(input)
-    body = GRU(4, return_sequences = True)(body)
+    body = GRU(64, return_sequences = True)(body)
     body = BatchNormalization()(body)
     body = Dropout(0.5)(body)
     body = GRU(64, return_sequences = True)(body)
