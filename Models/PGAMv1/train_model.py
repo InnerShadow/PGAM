@@ -101,8 +101,8 @@ def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_e
         y_true.append(to_categorical(y_target, num_classes = 2))
 
 
-    predictions = np.concatenate(predictions)
-    y_true = np.concatenate(y_true)
+    predictions = np.concatenate([predictions])
+    y_true = np.concatenate([y_true])
 
     draw_metrics_plot(global_train_history, global_val_history, "Model v1.", "./Moedls/PGAMv1/reports/")
     draw_roc_curve(y_true, predictions, "Model v1.", "./Moedls/PGAMv1/reports/")
