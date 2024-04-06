@@ -32,3 +32,4 @@ def get_training_data(fasta_files, gtf_files, n_window, max_len, nucleotide_code
                 X.clear()
                 y.clear()
 
+
