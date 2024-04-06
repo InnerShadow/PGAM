@@ -96,18 +96,17 @@ def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_e
 
     for k, (X_feature, y_target) in enumerate(get_training_data(fasta_test, gtf_test, n_window, n_samples_per_epoch, nucleotide_codes)):
         predicted = model.predict(X_feature)
-
         predictions.append(predicted)
         y_true.append(to_categorical(y_target, num_classes = 2))
 
 
-    predictions = np.concatenate([predictions])
-    y_true = np.concatenate([y_true])
+    predictions = np.concatenate(predictions)
+    y_true = np.concatenate(y_true)
 
-    draw_metrics_plot(global_train_history, global_val_history, "Model v1.", "./Moedls/PGAMv1/reports/")
-    draw_roc_curve(y_true, predictions, "Model v1.", "./Moedls/PGAMv1/reports/")
-    draw_precision_recall_curve(y_true, predictions, "Model v1.", "./Moedls/PGAMv1/reports/")
-    draw_confusion_matrix(y_true, predictions, "Model v1.", "./Moedls/PGAMv1/reports/")
+    draw_metrics_plot(global_train_history, global_val_history, "Model v1.", "./Models/PGAMv1/reports/")
+    draw_roc_curve(y_true, predictions, "Model v1.", "./Models/PGAMv1/reports/")
+    draw_precision_recall_curve(y_true, predictions, "Model v1.", "./Models/PGAMv1/reports/")
+    draw_confusion_matrix(y_true, predictions, "Model v1.", "./Models/PGAMv1/reports/")
 
     mlflow.keras.log_model(model, "PGAMv1")
     mlflow.end_run()

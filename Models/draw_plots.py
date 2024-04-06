@@ -15,8 +15,8 @@ def draw_metrics_plot(train_dic, val_dic, model_version, path):
 
     for train_metric, val_metric, metric_name in zip(train_metrics, val_metrics, metrics_names):
         plt.figure(figsize = (8, 5))
-        plt.plot(train_metric, label = f'{model_version}. Train {metric_name}', color = 'green', linestyle = ':', alpha = 0.6)
-        plt.plot(val_metric, label = f'{model_version}. Validation {metric_name}', color = 'blue', linestyle = '--', alpha = 0.8)
+        plt.plot(train_metric, label = f'{model_version}. Train {metric_name}', color = 'blue')
+        plt.plot(val_metric, label = f'{model_version}. Validation {metric_name}', color = 'red')
         # plt.plot(test_metric, label = f'{model_version}. Test {metric_name}', color = 'red', linestyle = '-', alpha = 1)
         plt.title(f'{model_version} {metric_name} over epochs')
         plt.xlabel('Epochs')
