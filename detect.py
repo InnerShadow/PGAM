@@ -2,7 +2,6 @@ import argparse
 import numpy as np
 
 from keras.models import load_model
-from keras.utils import to_categorical
 from Models.PGAMv1.get_training_data import get_training_data
 from Models.find_files import find_files
 
@@ -16,13 +15,14 @@ nucleotide_codes = {
 
 def detect(seq):
     with open('output.gtf', 'w') as file:
-        file.write("# PGAM")
-        file.write("\n# PGAMv1")
+        file.write("# PGAM\n")
+        file.write("# PGAMv1\n")
         
         exon_start = None
         exon_end = None
         exon_num = 1
         gap_length = 0
+        transcript_created = False
         
         for i, value in enumerate(seq):
             if value == 1:
@@ -30,18 +30,26 @@ def detect(seq):
                     exon_start = i
                 exon_end = i + 1
                 gap_length = 0
+                transcript_created = False
             else:
                 gap_length += 1
-                if exon_start is not None and (gap_length >= 10 or i == len(seq) - 1):
-                    if exon_end - exon_start >= 10:
-                        file.write(f"\nBA000007.3\tPGAM\ttranscript\t{exon_start}\t{exon_end}\t1000\t.\t.\tgene_id \"PGAM.{exon_num}\"; transcript_id \"PGAM.{exon_num}.1\";")
-                        file.write(f"\nBA000007.3\tPGAM\texon\t{exon_start}\t{exon_end}\t1000\t.\t.\tgene_id \"PGAM.{exon_num}\"; transcript_id \"PGAM.{exon_num}.1\"; exon_number \"1\";")
+                if exon_start is not None and (gap_length >= 50 or i == len(seq) - 1):
+                    if exon_end - exon_start >= 50:
+                        if not transcript_created:
+                            file.write(f"BA000007.3\tPGAM\ttranscript\t{exon_start}\t{exon_end}\t1000\t.\t.\tgene_id \"PGAM.{exon_num}\"; transcript_id \"PGAM.{exon_num}.1\";\n")
+                            transcript_created = True
+                        if exon_start is not None and exon_end is not None:
+                            file.write(f"BA000007.3\tPGAM\texon\t{exon_start}\t{exon_end}\t1000\t.\t.\tgene_id \"PGAM.{exon_num}\"; transcript_id \"PGAM.{exon_num}.1\"; exon_number \"1\";\n")
                         exon_num += 1
                     else:
-                        file.write(f" {exon_end}\t.\t.\tgene_id \"PGAM.{exon_num - 1}\"; transcript_id \"PGAM.{exon_num - 1}.1\";")
+                        if exon_start is not None and exon_end is not None:
+                            exon_end += 1
+                        else:
+                            exon_start = i + 1
+                            exon_end = i + 1
                     exon_start = None
                     exon_end = None
-                    gap_length = 0 
+                    gap_length = 0
 
 
 if __name__ == '__main__':
@@ -54,20 +62,16 @@ if __name__ == '__main__':
     fasta_test, gtf_test = find_files('./', 'test_sample', 'test_sample')
 
     predictions = []
-    # y_true = []
 
     model = load_model('./Models/PGAMv1/reports/PGAMv1.h5')
     model.summary()
 
     for k, (X_feature, y_target) in enumerate(get_training_data(fasta_test, gtf_test, args.n_window, args.n_samples_per_epoch, nucleotide_codes)):
         predicted = model.predict(X_feature)
-
         predictions.append(predicted)
-        # y_true.append(to_categorical(y_target, num_classes = 2))
 
 
     predictions = np.concatenate(predictions)
-    # y_true = np.concatenate(y_true)
 
-    detect(predictions)
+    detect(np.argmax(predictions, axis = 1))
 

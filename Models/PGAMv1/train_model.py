@@ -77,8 +77,8 @@ def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_e
 
 
         for it in ['loss', 'accuracy', 'precision', 'recall', 'f1', 'kappa', 'mcc', 'roc_auc']:
-            global_train_history[it].append(np.sum(train_history[it]) / j)
-            global_val_history[it].append(np.sum(val_history[it]) / j)
+            global_train_history[it].append(np.mean(train_history[it]))
+            global_val_history[it].append(np.mean(val_history[it]))
             
             train_history[it].clear()
             val_history[it].clear()
