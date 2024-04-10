@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers import Dense, Input, BatchNormalization, Reshape, Conv2D, MaxPooling2D, Flatten, concatenate
+from keras.layers import Dense, Input, BatchNormalization, Reshape, Conv2D, MaxPooling2D, Flatten, concatenate, Dropout
 
 def get_model(n_window, vocab_size, embedding_size):
     input = Input(shape = (n_window, ))
@@ -7,8 +7,10 @@ def get_model(n_window, vocab_size, embedding_size):
     body = BatchNormalization()(body)
     body = Conv2D(64, (3, 3), padding = 'same', activation = 'elu')(body)
     body_1 = MaxPooling2D((2 , 2))(body)
+    body = Dropout(0.5)(body)
     body = Conv2D(64, (3, 3), padding = 'same', activation = 'elu')(body_1)
     body_2 = MaxPooling2D((2 , 2))(body)
+    body = Dropout(0.5)(body)
     body = Conv2D(64, (3, 3), padding = 'same', activation = 'elu')(body_2)
     body_3 = MaxPooling2D((2 , 2))(body)
     body_1 = Flatten()(body_1)
@@ -16,7 +18,9 @@ def get_model(n_window, vocab_size, embedding_size):
     body_3 = Flatten()(body_3)
     concat = concatenate([body_1, body_2, body_3])
     body = Dense(1024, activation = 'elu')(concat)
+    body = Dropout(0.5)(body)
     body = Dense(512, activation = 'elu')(body)
+    body = Dropout(0.5)(body)
     body = Dense(128, activation = 'elu')(body)
     output = Dense(2, activation = 'softmax')(body)
 
