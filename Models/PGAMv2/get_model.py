@@ -14,6 +14,8 @@ def get_model(n_window, vocab_size, embedding_size):
     concat = concatenate([body_1, body_2, body_3])
     body = Flatten()(concat)
     body = Dense(1024, activation = 'elu')(body)
+    body = Dense(512, activation = 'elu')(body)
+    body = Dense(128, activation = 'elu')(body)
     output = Dense(2, activation = 'softmax')(body)
 
     model = Model(inputs = input, outputs = output)
