@@ -22,7 +22,14 @@ def get_training_data(fasta_files, gtf_files, n_window, max_len, nucleotide_code
                 padding = [nucleotide_codes['N']] * pad_start
                 window = padding + list(window)
 
-            exon_val = 1 if any(start <= j < end for transcript_exons in exon.values() for start, end in transcript_exons) else 0
+            exon_val = 0
+            for transcript_exons in exon.values():
+                for start, end in transcript_exons:
+                    if start <= j < end:
+                        exon_val = 1
+                        break
+                if exon_val == 1:
+                    break
 
             X.append(np.array(window))
             y.append(exon_val)

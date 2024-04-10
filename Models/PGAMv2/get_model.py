@@ -1,31 +1,26 @@
 from keras.models import Model
-from keras.layers import GRU, Dense, Embedding, Input, BatchNormalization, Dropout
+from keras.layers import Dense, Input, BatchNormalization, Reshape, Conv2D, MaxPooling2D, Flatten, concatenate
 
 def get_model(n_window, vocab_size, embedding_size):
     input = Input(shape = (n_window, ))
-    body = Embedding(input_dim = vocab_size, output_dim = embedding_size)(input)
-    body = GRU(64, return_sequences = True)(body)
+    body = Reshape(target_shape = (40, 25, 1))(input)
     body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    body = GRU(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    body = GRU(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    body = GRU(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    body = GRU(4, return_sequences = False)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
+    body = Conv2D(64, (3, 3), padding = 'same', activation = 'elu')(body)
+    body_1 = MaxPooling2D((2 , 2))(body)
+    body = Conv2D(64, (3, 3), padding = 'same', activation = 'elu')(body_1)
+    body_2 = MaxPooling2D((2 , 2))(body)
+    body = Conv2D(64, (3, 3), padding = 'same', activation = 'elu')(body_2)
+    body_3 = MaxPooling2D((2 , 2))(body)
+    concat = concatenate([body_1, body_2, body_3])
+    body = Flatten()(concat)
+    body = Dense(1024, activation = 'elu')(body)
     output = Dense(2, activation = 'softmax')(body)
 
     model = Model(inputs = input, outputs = output)
-    
+
     model.compile(optimizer = 'adam',
-              loss = 'categorical_crossentropy',
-              metrics = ['accuracy'])
+                  loss = 'categorical_crossentropy',
+                  metrics = ['accuracy'])
 
     model.summary()
 

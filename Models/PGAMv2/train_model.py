@@ -77,8 +77,8 @@ def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_e
 
 
         for it in ['loss', 'accuracy', 'precision', 'recall', 'f1', 'kappa', 'mcc', 'roc_auc']:
-            global_train_history[it].append(np.sum(train_history[it]) / j)
-            global_val_history[it].append(np.sum(val_history[it]) / j)
+            global_train_history[it].append(np.mean(train_history[it]))
+            global_val_history[it].append(np.mean(val_history[it]))
             
             train_history[it].clear()
             val_history[it].clear()
@@ -96,7 +96,6 @@ def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_e
 
     for k, (X_feature, y_target) in enumerate(get_training_data(fasta_test, gtf_test, n_window, n_samples_per_epoch, nucleotide_codes)):
         predicted = model.predict(X_feature)
-
         predictions.append(predicted)
         y_true.append(to_categorical(y_target, num_classes = 2))
 
@@ -104,10 +103,10 @@ def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_e
     predictions = np.concatenate(predictions)
     y_true = np.concatenate(y_true)
 
-    draw_metrics_plot(global_train_history, global_val_history, "Model v2.", "./Moedls/PGAMv2/reports/")
-    draw_roc_curve(y_true, predictions, "Model v2.", "./Moedls/PGAMv1/reports/")
-    draw_precision_recall_curve(y_true, predictions, "Model v2.", "./Moedls/PGAMv2/reports/")
-    draw_confusion_matrix(y_true, predictions, "Model v2.", "./Moedls/PGAMv2/reports/")
+    draw_metrics_plot(global_train_history, global_val_history, "Model v2.", "./Models/PGAMv2/reports/")
+    draw_roc_curve(y_true, predictions, "Model v2.", "./Models/PGAMv2/reports/")
+    draw_precision_recall_curve(y_true, predictions, "Model v2.", "./Models/PGAMv2/reports/")
+    draw_confusion_matrix(y_true, predictions, "Model v2.", "./Models/PGAMv2/reports/")
 
     mlflow.keras.log_model(model, "PGAMv2")
     mlflow.end_run()
