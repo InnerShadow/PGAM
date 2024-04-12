@@ -75,6 +75,14 @@ def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_e
             except Exception as e:
                 val_history['roc_auc'].append(0)
 
+            X_train[:] = 0
+            X_val[:] = 0
+            y_target_one_hot[:] = 0
+            y_train[:] = 0
+            y_val[:] = 0
+            X_feature[:] = 0
+            y_target[:] = 0
+
 
         for it in ['loss', 'accuracy', 'precision', 'recall', 'f1', 'kappa', 'mcc', 'roc_auc']:
             global_train_history[it].append(np.mean(train_history[it]))
@@ -89,6 +97,11 @@ def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_e
         mlflow.log_metric(f"val_{it}", global_val_history[it][-1])
 
 
+    test_history = {
+        'loss' : [], 'accuracy' : [], 'precision' : [], 'recall' : [],
+        'f1' : [], 'kappa' : [], 'mcc' : [], 'roc_auc' : []
+    }
+
     fasta_test, gtf_test = find_files('./', 'test_sample', 'test_sample')
 
     predictions = []
@@ -99,6 +112,25 @@ def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_e
         predictions.append(predicted)
         y_true.append(to_categorical(y_target, num_classes = 2))
 
+        test_predictions_classes = np.argmax(predicted, axis = 1)
+        test_history['accuracy'].append(accuracy_score(y_target, test_predictions_classes))
+        test_history['precision'].append(precision_score(y_target, test_predictions_classes))
+        test_history['recall'].append(recall_score(y_target, test_predictions_classes))
+        test_history['f1'].append(f1_score(y_target, test_predictions_classes))
+        test_history['kappa'].append(cohen_kappa_score(y_target, test_predictions_classes))
+        test_history['mcc'].append(matthews_corrcoef(y_target, test_predictions_classes))
+        try:
+            test_history['roc_auc'].append(roc_auc_score(y_target, predicted))
+        except Exception as e:
+            test_history['roc_auc'].append(0)
+
+        y_target[:] = 0
+        test_predictions_classes[:] = 0
+        X_feature[:] = 0
+        predicted[:] = 0
+
+    for it in ['loss', 'accuracy', 'precision', 'recall', 'f1', 'kappa', 'mcc', 'roc_auc']:
+        mlflow.log_metric(f"test_{it}", np.mean(test_history[it]))
 
     predictions = np.concatenate(predictions)
     y_true = np.concatenate(y_true)
