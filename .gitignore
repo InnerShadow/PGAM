@@ -9,4 +9,5 @@ PGAMenv
 /data/reports/2'nd_clean/*txt
 /data/samples/sample_*
 /data/test_sample/*
-
+*.csv
+*.fasta
