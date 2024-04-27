@@ -33,8 +33,8 @@ def detect(seq):
                 transcript_created = False
             else:
                 gap_length += 1
-                if exon_start is not None and (gap_length >= 50 or i == len(seq) - 1):
-                    if exon_end - exon_start >= 50:
+                if exon_start is not None and (gap_length >= 100 or i == len(seq) - 1):
+                    if exon_end - exon_start >= 100:
                         if not transcript_created:
                             file.write(f"BA000007.3\tPGAM\ttranscript\t{exon_start}\t{exon_end}\t1000\t.\t.\tgene_id \"PGAM.{exon_num}\"; transcript_id \"PGAM.{exon_num}.1\";\n")
                             transcript_created = True
@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     predictions = []
 
-    model = load_model('./Models/PGAMv1/reports/PGAMv1.h5')
+    model = load_model('./Models/PGAMv3/reports/PGAMv3.h5')
     model.summary()
 
     for k, (X_feature, y_target) in enumerate(get_training_data(fasta_test, gtf_test, args.n_window, args.n_samples_per_epoch, nucleotide_codes)):

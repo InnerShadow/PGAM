@@ -8,14 +8,11 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 from Models.PGAMv3.get_training_data import get_training_data
 from Models.find_files import find_files
-from Models.read_fasta_file import read_fasta_file
-from Models.parse_gtf_file import parse_gtf_file
-from Models.encode_sequence import encode_sequence
 from Models.draw_plots import *
 
-def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_samples_per_epoch, n_times, batch_size, nucleotide_codes):
+def train_model(model, epochs, fasta_files, gtf_files, n_window, n_samples_per_epoch, n_times, batch_size, nucleotide_codes):
     mlflow.set_tracking_uri("./Models/PGAMv3/mlflowRuns")
-    mlflow.set_experiment("PGAMv3")
+    mlflow.set_experiment("PGAMv2")
 
     mlflow.log_param("n_window", n_window)
     mlflow.log_param("n_samples_per_epoch", n_samples_per_epoch)
@@ -44,14 +41,14 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
 
     for i in range(epochs):
         print(f"Global Epoch: {i + 1}")
-        for j, (X_feature_1, X_feature_2, y_target) in enumerate(get_training_data(encoded_sequences_array, exon_array, n_window, n_samples_per_epoch, nucleotide_codes)):
+        for j, (X_feature, y_target) in enumerate(get_training_data(fasta_files, gtf_files, n_window, n_samples_per_epoch, nucleotide_codes)):
             print(f"Local Epoch: {j + 1}")
             y_target_one_hot = to_categorical(y_target, num_classes = 2)
-            X_1_train, X_1_val, X_2_train, X_2_val,  y_train, y_val = train_test_split(X_feature_1, X_feature_2, y_target_one_hot, train_size = 0.8, random_state = 1212)
-            history = model.fit([X_1_train, X_2_train], y_train, epochs = n_times, batch_size = batch_size, validation_data = [[X_1_val, X_2_val], y_val], callbacks = [tensorboard_callback])
+            X_train, X_val, y_train, y_val = train_test_split(X_feature, y_target_one_hot, train_size = 0.8, random_state = 1212)
+            history = model.fit(X_train, y_train, epochs = n_times, batch_size = batch_size, validation_data = [X_val, y_val], callbacks = [tensorboard_callback])
             
             train_history['loss'].append(np.mean(history.history['loss']))
-            train_predictions = model.predict([X_1_train, X_2_train])
+            train_predictions = model.predict(X_train)
             train_predictions_classes = np.argmax(train_predictions, axis = 1)
             train_history['accuracy'].append(accuracy_score(np.argmax(y_train, axis = 1), train_predictions_classes))
             train_history['precision'].append(precision_score(np.argmax(y_train, axis = 1), train_predictions_classes))
@@ -65,7 +62,7 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
                 train_history['roc_auc'].append(0)
             
             val_history['loss'].append(np.mean(history.history['val_loss']))
-            val_predictions = model.predict([X_1_val, X_2_val])
+            val_predictions = model.predict(X_val)
             val_predictions_classes = np.argmax(val_predictions, axis = 1)
             val_history['accuracy'].append(accuracy_score(np.argmax(y_val, axis = 1), val_predictions_classes))
             val_history['precision'].append(precision_score(np.argmax(y_val, axis = 1), val_predictions_classes))
@@ -78,10 +75,18 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
             except Exception as e:
                 val_history['roc_auc'].append(0)
 
+            X_train[:] = 0
+            X_val[:] = 0
+            y_target_one_hot[:] = 0
+            y_train[:] = 0
+            y_val[:] = 0
+            X_feature[:] = 0
+            y_target[:] = 0
+
 
         for it in ['loss', 'accuracy', 'precision', 'recall', 'f1', 'kappa', 'mcc', 'roc_auc']:
-            global_train_history[it].append(np.sum(train_history[it]) / j)
-            global_val_history[it].append(np.sum(val_history[it]) / j)
+            global_train_history[it].append(np.mean(train_history[it]))
+            global_val_history[it].append(np.mean(val_history[it]))
             
             train_history[it].clear()
             val_history[it].clear()
@@ -92,25 +97,48 @@ def train_model(model, epochs, encoded_sequences_array, exon_array, n_window, n_
         mlflow.log_metric(f"val_{it}", global_val_history[it][-1])
 
 
+    test_history = {
+        'loss' : [], 'accuracy' : [], 'precision' : [], 'recall' : [],
+        'f1' : [], 'kappa' : [], 'mcc' : [], 'roc_auc' : []
+    }
+
     fasta_test, gtf_test = find_files('./', 'test_sample', 'test_sample')
 
     predictions = []
     y_true = []
 
-    for k, (X_feature_1, X_feature__2, y_target) in enumerate(get_training_data(fasta_test, gtf_test, n_window, n_samples_per_epoch, nucleotide_codes)):
-        predicted = model.predict([X_feature_1, X_feature__2])
-
+    for k, (X_feature, y_target) in enumerate(get_training_data(fasta_test, gtf_test, n_window, n_samples_per_epoch, nucleotide_codes)):
+        predicted = model.predict(X_feature)
         predictions.append(predicted)
         y_true.append(to_categorical(y_target, num_classes = 2))
 
+        test_predictions_classes = np.argmax(predicted, axis = 1)
+        test_history['accuracy'].append(accuracy_score(y_target, test_predictions_classes))
+        test_history['precision'].append(precision_score(y_target, test_predictions_classes))
+        test_history['recall'].append(recall_score(y_target, test_predictions_classes))
+        test_history['f1'].append(f1_score(y_target, test_predictions_classes))
+        test_history['kappa'].append(cohen_kappa_score(y_target, test_predictions_classes))
+        test_history['mcc'].append(matthews_corrcoef(y_target, test_predictions_classes))
+        try:
+            test_history['roc_auc'].append(roc_auc_score(y_target, predicted))
+        except Exception as e:
+            test_history['roc_auc'].append(0)
+
+        y_target[:] = 0
+        test_predictions_classes[:] = 0
+        X_feature[:] = 0
+        predicted[:] = 0
+
+    for it in ['loss', 'accuracy', 'precision', 'recall', 'f1', 'kappa', 'mcc', 'roc_auc']:
+        mlflow.log_metric(f"test_{it}", np.mean(test_history[it]))
 
     predictions = np.concatenate(predictions)
     y_true = np.concatenate(y_true)
 
-    draw_metrics_plot(global_train_history, global_val_history, "Model v3.", "./Moedls/PGAMv2/reports/")
-    draw_roc_curve(y_true, predictions, "Model v3.", "./Moedls/PGAMv3/reports/")
-    draw_precision_recall_curve(y_true, predictions, "Model v3.", "./Moedls/PGAMv3/reports/")
-    draw_confusion_matrix(y_true, predictions, "Model v3.", "./Moedls/PGAMv3/reports/")
+    draw_metrics_plot(global_train_history, global_val_history, "Model v3.", "./Models/PGAMv3/reports/")
+    draw_roc_curve(y_true, predictions, "Model v3.", "./Models/PGAMv3/reports/")
+    draw_precision_recall_curve(y_true, predictions, "Model v3.", "./Models/PGAMv3/reports/")
+    draw_confusion_matrix(y_true, predictions, "Model v3.", "./Models/PGAMv3/reports/")
 
     mlflow.keras.log_model(model, "PGAMv3")
     mlflow.end_run()

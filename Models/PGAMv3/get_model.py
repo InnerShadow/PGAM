@@ -1,48 +1,26 @@
 from keras.models import Model
-from keras.layers import LSTM, Dense, Embedding, Input, BatchNormalization, Dropout, concatenate
+from keras.layers import Dense, Input, BatchNormalization, Reshape, Conv2D, MaxPooling2D, Flatten, GRU, Dropout, Attention
+from keras.losses import SparseCategoricalCrossentropy
 
 def get_model(n_window, vocab_size, embedding_size):
-    input_1 = Input(shape = (n_window, ))
-    body = Embedding(input_dim = vocab_size, output_dim = embedding_size)(input_1)
-    body = LSTM(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
+    input = Input(shape = (n_window, ))
+    body = BatchNormalization()(input)
+    body = Reshape((25, 10, 1))(body)
+    body = Conv2D(64, (2, 2), padding = 'same', activation = 'elu')(body)
+    body = MaxPooling2D((2, 2))(body)
+    body = Dropout(0.7)(body)
+    body = Conv2D(64, (2, 2), padding = 'same', activation = 'elu')(body)
+    body = MaxPooling2D((2, 2))(body)
     body = Dropout(0.5)(body)
-    body = LSTM(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    body = LSTM(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    body = LSTM(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    output_1 = LSTM(64, return_sequences = False)(body)
+    body = Flatten()(body)
+    body = Dense(512, activation = 'elu')(body)
+    output = Dense(2, activation = 'softmax')(body)
 
-    input_2 = Input(shape = (n_window, ))
-    body = Embedding(input_dim = vocab_size, output_dim = embedding_size)(input_2)
-    body = LSTM(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    body = LSTM(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    body = LSTM(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    body = LSTM(64, return_sequences = True)(body)
-    body = BatchNormalization()(body)
-    body = Dropout(0.5)(body)
-    output_2 = LSTM(64, return_sequences = False)(body)
+    model = Model(inputs = input, outputs = output)
 
-    merged = concatenate([output_1, output_2])
-
-    output = Dense(2, activation = 'softmax')(merged)
-
-    model = Model(inputs = [input_1, input_2], outputs = output)
-    
     model.compile(optimizer = 'adam',
-              loss = 'categorical_crossentropy',
-              metrics = ['accuracy'])
+                  loss = 'categorical_crossentropy',
+                  metrics = ['accuracy'])
 
     model.summary()
 
