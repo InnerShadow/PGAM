@@ -11,3 +11,4 @@ PGAMenv
 /data/test_sample/*
 *.csv
 *.fasta
+annotations.gtf
