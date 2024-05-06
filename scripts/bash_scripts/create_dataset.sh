@@ -75,7 +75,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                 # Remove reads with low quality &
                 # discard remaining adapters &
                 # generate fastp report in html format 
-                fastp -i "${read_id}.fastq" -o "${read_id}_fastp.fastq" -h "${read_id}_fastp_report.html"
+                fastp -i "${read_id}.fastq" -o "${read_id}_fastp.fastq" -Q -h "${read_id}_fastp_report.html"
 
                 # Align reads to the reference genome & save align results to .txt file
                 (bowtie2 --local -p "${num_theds}" -x "../index/${reference_genome}_index" -U "${read_id}_fastp.fastq" \
