@@ -13,3 +13,4 @@ PGAMenv
 *.fasta
 annotations.gtf
 csv_folder/*
+*.gff3
